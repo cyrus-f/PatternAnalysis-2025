@@ -1,15 +1,6 @@
 import torch
 import torch.nn as nn
 
-# CONSTANTS
-IN_CHANNELS  = 3     #(1)
-IMAGE_SIZE   = 224   #(2)
-
-NUM_BLOCKS   = [3, 3, 9, 3]         #(3)
-OUT_CHANNELS = [96, 192, 384, 768]  #(4)
-NUM_CLASSES  = 1000  #(5)
-
-
 class ConvNeXtBlock(nn.Module):
     """A single ConvNeXt block as described in the ConvNeXt paper.
     Args:
@@ -103,25 +94,44 @@ class ConvNeXtBlockTransition(nn.Module):
                                     kernel_size=2, 
                                     stride=2)
     def forward(self, x):
-        """
-        Forward pass of the ConvNeXt block with transition.
-        Args:
-            x (torch.Tensor): Input tensor of shape (N, C_in, H, W)
-        Returns:
-            torch.Tensor: Output tensor of shape (N, C_out, H/2, W/2)
-        """
         residual = self.projection(x)  #(1)
         x = self.conv0(x)
         x = x.permute(0, 2, 3, 1)
+       
+        
         x = self.norm0(x)
+        
         x = x.permute(0, 3, 1, 2)
+        
         x = self.conv1(x)
+        print(f'after conv1\t\t: {x.size()}')
+        
         x = self.gelu(x)
+        print(f'after gelu\t\t: {x.size()}')
+        
         x = self.conv2(x)
+        print(f'after conv2\t\t: {x.size()}')
+
         x = x.permute(0, 2, 3, 1)
+        print(f'after permute\t\t: {x.size()}')
+        
         x = self.norm1(x)
+        print(f'after norm1\t\t: {x.size()}')
+        
         x = x.permute(0, 3, 1, 2)
+        print(f'after permute\t\t: {x.size()}')
+        
         x = self.downsample(x)  #(2)
+        print(f'after downsample\t: {x.size()}')
+        
         x = x + residual  #(3)
+        print(f'after summation\t\t: {x.size()}')
         
         return x
+
+# Codeblock 5
+convnext_block_transition_test = ConvNeXtBlockTransition(in_channels=96, 
+                                                         out_channels=192)
+x_test = torch.rand(1, 96, 56, 56)
+
+out_test = convnext_block_transition_test(x_test)
