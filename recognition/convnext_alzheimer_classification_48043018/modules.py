@@ -132,8 +132,9 @@ class ConvNeXtBlockTransition(nn.Module):
         return x
     
 class ConvNeXt(nn.Module):
-    """"The ConvNeXt architecture for image classification.
-    Args:"""
+    """"
+    The ConvNeXt architecture for image classification.
+    """
     def __init__(self):
         super().__init__()
         # stem layer convolution with 4x4 kernel and stride 4, reducing spatial dimensions to 1/4 of original
@@ -170,3 +171,35 @@ class ConvNeXt(nn.Module):
                             out_features=NUM_CLASSES)
         
         self.relu = nn.ReLU()
+
+    def forward(self, x):
+            """
+            Forward pass of the ConvNeXt model.
+            Args:
+                x (torch.Tensor): Input tensor of shape (N, C, H, W)
+            Returns:
+                torch.Tensor: Output tensor of shape (N, NUM_CLASSES)   
+            """
+            x = self.relu(self.stem(x))
+            x = x.permute(0, 2, 3, 1) # adjust dimensions for layer norm to (N, H, W, C)
+            x = self.normstem(x)
+            x = x.permute(0, 3, 1, 2) # adjust dimensions back to (N, C, H, W)
+            for i, block in enumerate(self.res2):    
+                x = block(x)
+
+            for i, block in enumerate(self.res3):    
+                x = block(x)
+
+            for i, block in enumerate(self.res4):    
+                x = block(x)
+
+            for i, block in enumerate(self.res5):    
+                x = block(x)
+
+            x = self.avgpool(x)
+            x = x.permute(0, 2, 3, 1) # adjust dimensions for layer norm to (N, H, W, C)
+            x = self.normpool(x)
+            x = x.permute(0, 3, 1, 2) # adjust dimensions back to (N, C, H, W)
+            x = x.reshape(x.shape[0], -1)             
+            x = self.fc(x)
+            return x

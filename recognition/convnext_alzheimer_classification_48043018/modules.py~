@@ -1,6 +1,15 @@
 import torch
 import torch.nn as nn
 
+# CONSTANTS
+IN_CHANNELS  = 3     
+IMAGE_SIZE   = 224   
+
+NUM_BLOCKS   = [3, 3, 9, 3]       # implementing the ConvNeXt-T variant architecture
+OUT_CHANNELS = [96, 192, 384, 768]  
+NUM_CLASSES  = 2 # number of output classes for classification namely Alzheimer’s disease (AD) and Cognitive Normal (CN)
+
+
 class ConvNeXtBlock(nn.Module):
     """A single ConvNeXt block as described in the ConvNeXt paper.
     Args:
@@ -54,6 +63,11 @@ class ConvNeXtBlock(nn.Module):
         return x
     
 class ConvNeXtBlockTransition(nn.Module):
+    """A ConvNeXt block with transition to downsample and change number of channels.
+    Args:
+        in_channels (int): The number of input channels.
+        out_channels (int): The number of output channels.  
+    """
     def __init__(self, in_channels, out_channels):  # different number of input and output channels
         super().__init__()
         hidden_channels = out_channels * 4
@@ -94,44 +108,134 @@ class ConvNeXtBlockTransition(nn.Module):
                                     kernel_size=2, 
                                     stride=2)
     def forward(self, x):
+        """
+        Forward pass of the ConvNeXt block with transition.
+        Args:
+            x (torch.Tensor): Input tensor of shape (N, C_in, H, W)
+        Returns:
+            torch.Tensor: Output tensor of shape (N, C_out, H/2, W/2)
+        """
         residual = self.projection(x)  #(1)
         x = self.conv0(x)
         x = x.permute(0, 2, 3, 1)
-       
-        
         x = self.norm0(x)
-        
         x = x.permute(0, 3, 1, 2)
-        
         x = self.conv1(x)
-        print(f'after conv1\t\t: {x.size()}')
-        
         x = self.gelu(x)
-        print(f'after gelu\t\t: {x.size()}')
-        
         x = self.conv2(x)
-        print(f'after conv2\t\t: {x.size()}')
-
         x = x.permute(0, 2, 3, 1)
-        print(f'after permute\t\t: {x.size()}')
-        
         x = self.norm1(x)
-        print(f'after norm1\t\t: {x.size()}')
-        
         x = x.permute(0, 3, 1, 2)
-        print(f'after permute\t\t: {x.size()}')
-        
         x = self.downsample(x)  #(2)
-        print(f'after downsample\t: {x.size()}')
-        
         x = x + residual  #(3)
-        print(f'after summation\t\t: {x.size()}')
         
         return x
+    
+class ConvNeXt(nn.Module):
+    """"The ConvNeXt architecture for image classification.
+    Args:"""
+    def __init__(self):
+        super().__init__()
+        # stem layer convolution with 4x4 kernel and stride 4, reducing spatial dimensions to 1/4 of original
+        self.stem = nn.Conv2d(in_channels=IN_CHANNELS,    
+                              out_channels=OUT_CHANNELS[0],
+                              kernel_size=4,
+                              stride=4,
+                             )
 
-# Codeblock 5
-convnext_block_transition_test = ConvNeXtBlockTransition(in_channels=96, 
-                                                         out_channels=192)
-x_test = torch.rand(1, 96, 56, 56)
+        self.normstem = nn.LayerNorm(normalized_shape=OUT_CHANNELS[0])  # layer normalization after stem
+        
+        self.res2 = nn.ModuleList()
+        for _ in range(NUM_BLOCKS[0]):
+            self.res2.append(ConvNeXtBlock(num_channels=OUT_CHANNELS[0]))
+        
+        self.res3 = nn.ModuleList([ConvNeXtBlockTransition(in_channels=OUT_CHANNELS[0], 
+                                                           out_channels=OUT_CHANNELS[1])])
+        for _ in range(NUM_BLOCKS[1]-1):
+            self.res3.append(ConvNeXtBlock(num_channels=OUT_CHANNELS[1]))
 
-out_test = convnext_block_transition_test(x_test)
+        self.res4 = nn.ModuleList([ConvNeXtBlockTransition(in_channels=OUT_CHANNELS[1], 
+                                                           out_channels=OUT_CHANNELS[2])])
+        for _ in range(NUM_BLOCKS[2]-1):
+            self.res4.append(ConvNeXtBlock(num_channels=OUT_CHANNELS[2]))
+
+        self.res5 = nn.ModuleList([ConvNeXtBlockTransition(in_channels=OUT_CHANNELS[2], 
+                                                           out_channels=OUT_CHANNELS[3])])
+        for _ in range(NUM_BLOCKS[3]-1):
+            self.res5.append(ConvNeXtBlock(num_channels=OUT_CHANNELS[3]))
+    
+        self.avgpool = nn.AdaptiveAvgPool2d(output_size=(1,1))  # reduce to 1x1 by averaging over channel dimensions
+        self.normpool = nn.LayerNorm(normalized_shape=OUT_CHANNELS[3])  # layer normalization after pooling
+        self.fc = nn.Linear(in_features=OUT_CHANNELS[3],        # output layer for classification
+                            out_features=NUM_CLASSES)
+        
+        self.relu = nn.ReLU()
+
+    def forward(self, x):
+            """
+            Forward pass of the ConvNeXt model.
+            Args:
+                x (torch.Tensor): Input tensor of shape (N, C, H, W)
+            Returns:
+                torch.Tensor: Output tensor of shape (N, NUM_CLASSES)   
+            """
+            print(f'original\t: {x.size()}')
+            
+            x = self.relu(self.stem(x))
+            print(f'after stem\t: {x.size()}')
+
+            x = x.permute(0, 2, 3, 1)
+            print(f'after permute\t: {x.size()}')
+            
+            x = self.normstem(x)
+            print(f'after normstem\t: {x.size()}')
+            
+            x = x.permute(0, 3, 1, 2)
+            print(f'after permute\t: {x.size()}')
+            
+            print()
+            for i, block in enumerate(self.res2):    #(1)
+                x = block(x)
+                print(f'after res2 #{i}\t: {x.size()}')
+            
+            print()
+            for i, block in enumerate(self.res3):    #(2)
+                x = block(x)
+                print(f'after res3 #{i}\t: {x.size()}')
+            
+            print()
+            for i, block in enumerate(self.res4):    #(3)
+                x = block(x)
+                print(f'after res4 #{i}\t: {x.size()}')
+            
+            print()
+            for i, block in enumerate(self.res5):    #(4)
+                x = block(x)
+                print(f'after res5 #{i}\t: {x.size()}')
+            
+            print()
+            x = self.avgpool(x)
+            print(f'after avgpool\t: {x.size()}')
+
+            x = x.permute(0, 2, 3, 1)
+            print(f'after permute\t: {x.size()}')
+            
+            x = self.normpool(x)
+            print(f'after normpool\t: {x.size()}')
+            
+            x = x.permute(0, 3, 1, 2)
+            print(f'after permute\t: {x.size()}')
+            
+            x = x.reshape(x.shape[0], -1)             #(5)
+            print(f'after reshape\t: {x.size()}')
+            
+            x = self.fc(x)
+            print(f'after fc\t: {x.size()}')          #(6)
+            
+            return x
+
+# Codeblock 8
+convnext_test = ConvNeXt()
+
+x_test   = torch.rand(1, IN_CHANNELS, IMAGE_SIZE, IMAGE_SIZE)
+out_test = convnext_test(x_test)
