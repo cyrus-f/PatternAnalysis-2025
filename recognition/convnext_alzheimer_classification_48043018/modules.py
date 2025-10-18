@@ -63,6 +63,11 @@ class ConvNeXtBlock(nn.Module):
         return x
     
 class ConvNeXtBlockTransition(nn.Module):
+    """A ConvNeXt block with transition to downsample and change number of channels.
+    Args:
+        in_channels (int): The number of input channels.
+        out_channels (int): The number of output channels.  
+    """
     def __init__(self, in_channels, out_channels):  # different number of input and output channels
         super().__init__()
         hidden_channels = out_channels * 4
@@ -125,3 +130,43 @@ class ConvNeXtBlockTransition(nn.Module):
         x = x + residual  #(3)
         
         return x
+    
+class ConvNeXt(nn.Module):
+    """"The ConvNeXt architecture for image classification.
+    Args:"""
+    def __init__(self):
+        super().__init__()
+        # stem layer convolution with 4x4 kernel and stride 4, reducing spatial dimensions to 1/4 of original
+        self.stem = nn.Conv2d(in_channels=IN_CHANNELS,    
+                              out_channels=OUT_CHANNELS[0],
+                              kernel_size=4,
+                              stride=4,
+                             )
+
+        self.normstem = nn.LayerNorm(normalized_shape=OUT_CHANNELS[0])  # layer normalization after stem
+        
+        self.res2 = nn.ModuleList()
+        for _ in range(NUM_BLOCKS[0]):
+            self.res2.append(ConvNeXtBlock(num_channels=OUT_CHANNELS[0]))
+        
+        self.res3 = nn.ModuleList([ConvNeXtBlockTransition(in_channels=OUT_CHANNELS[0], 
+                                                           out_channels=OUT_CHANNELS[1])])
+        for _ in range(NUM_BLOCKS[1]-1):
+            self.res3.append(ConvNeXtBlock(num_channels=OUT_CHANNELS[1]))
+
+        self.res4 = nn.ModuleList([ConvNeXtBlockTransition(in_channels=OUT_CHANNELS[1], 
+                                                           out_channels=OUT_CHANNELS[2])])
+        for _ in range(NUM_BLOCKS[2]-1):
+            self.res4.append(ConvNeXtBlock(num_channels=OUT_CHANNELS[2]))
+
+        self.res5 = nn.ModuleList([ConvNeXtBlockTransition(in_channels=OUT_CHANNELS[2], 
+                                                           out_channels=OUT_CHANNELS[3])])
+        for _ in range(NUM_BLOCKS[3]-1):
+            self.res5.append(ConvNeXtBlock(num_channels=OUT_CHANNELS[3]))
+    
+        self.avgpool = nn.AdaptiveAvgPool2d(output_size=(1,1))  # reduce to 1x1 by averaging over channel dimensions
+        self.normpool = nn.LayerNorm(normalized_shape=OUT_CHANNELS[3])  # layer normalization after pooling
+        self.fc = nn.Linear(in_features=OUT_CHANNELS[3],        # output layer for classification
+                            out_features=NUM_CLASSES)
+        
+        self.relu = nn.ReLU()
