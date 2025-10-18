@@ -31,9 +31,27 @@ class ADNIDataset(Dataset):
         self.root_dir = root_dir
         self.transform = transform
         self.image_infos = []
+        for label, subdir in enumerate(['NC', 'AD']):
+            subdir_path = os.path.join(root_dir, subdir)
+            for img_name in os.listdir(subdir_path):
+                img_path = os.path.join(subdir_path, img_name)
+                self.image_infos.append(ImageInfo(img_path, label))
 
     def __len__(self):
-        return len(self.annotations)
+        return len(self.image_infos)
 
     def __getitem__(self, idx):
-        pass
+        """
+        Args:
+            idx (int): Index
+        Returns:
+            tuple: (image, label) where image is a transformed image tensor and label is its corresponding label.
+        """
+        img_info = self.image_infos[idx]
+        image = Image.open(img_info.image_path).convert('RGB')
+        label = img_info.label
+
+        if self.transform:
+            image = self.transform(image)
+
+        return image, label
