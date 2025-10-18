@@ -2,12 +2,12 @@ import torch
 import torch.nn as nn
 
 # CONSTANTS
-IN_CHANNELS  = 3     #(1)
-IMAGE_SIZE   = 224   #(2)
+IN_CHANNELS  = 3     
+IMAGE_SIZE   = 224   
 
-NUM_BLOCKS   = [3, 3, 9, 3]         #(3)
-OUT_CHANNELS = [96, 192, 384, 768]  #(4)
-NUM_CLASSES  = 1000  #(5)
+NUM_BLOCKS   = [3, 3, 9, 3]       # implementing the ConvNeXt-T variant architecture
+OUT_CHANNELS = [96, 192, 384, 768]  
+NUM_CLASSES  = 2 # number of output classes for classification namely Alzheimer’s disease (AD) and Cognitive Normal (CN)
 
 
 class ConvNeXtBlock(nn.Module):
