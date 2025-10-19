@@ -35,6 +35,7 @@ AD = 1
 num_epochs = 30
 learning_rate = 0.001
 batch_size = 512
+num_workers = 2 # number of subprocesses to use for data loading
 
 # Data transformations
 train_transform = transforms.Compose([
@@ -66,9 +67,9 @@ if __name__ == "__main__":
     train_dataset, val_dataset = torch.utils.data.random_split(train_dataset, [0.8, 0.2], generator=generator) # do an 80-20 split for training and validation
 
     # dataloaders
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=4)
-    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=4)
-    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=4)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers)
+    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers)
+    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers)
     
     
     # model, loss function, optimizer
