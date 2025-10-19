@@ -79,7 +79,7 @@ if __name__ == "__main__":
     # model, loss function, optimizer
     model = ConvNeXt().to(device)
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+    optimizer = optim.AdamW(model.parameters(), lr=learning_rate)
 
     # Training loop
     train_losses = []
