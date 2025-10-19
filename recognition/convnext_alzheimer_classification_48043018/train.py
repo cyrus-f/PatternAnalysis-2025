@@ -17,7 +17,7 @@ LOCAL = 0
 COLAB = 1
 RANGPUR = 2
 
-MACHINE = RANGPUR # change this depending on where you run the code
+MACHINE = COLAB # change this depending on where you run the code
 # Device configuration
 if torch.cuda.is_available(): # for GPU users
     device = torch.device('cuda')
@@ -58,8 +58,10 @@ test_dir = ['./ADNI/AD_NC/test',
               '/home/groups/comp3710/ADNI/AD_NC/test'][MACHINE]
 
 # Datasets
+print("Loading datasets...")
 train_dataset = ADNIDataset(root_dir=train_dir, transform=train_transform)
 test_dataset = ADNIDataset(root_dir=test_dir, transform=test_transform)
+print("Datasets loaded.")
 
 if __name__ == "__main__":
     # split train dataset into train and validation
@@ -67,10 +69,11 @@ if __name__ == "__main__":
     train_dataset, val_dataset = torch.utils.data.random_split(train_dataset, [0.8, 0.2], generator=generator) # do an 80-20 split for training and validation
 
     # dataloaders
+    print("Creating data loaders...")
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers)
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers)
-    
+    print("Data loaders created.")
     
     # model, loss function, optimizer
     model = ConvNeXt().to(device)
