@@ -34,7 +34,7 @@ AD = 1
 # Hyperparameters
 num_epochs = 30
 learning_rate = 0.001
-batch_size = 512
+batch_size = 128
 num_workers = 2 # number of subprocesses to use for data loading
 
 # Data transformations
