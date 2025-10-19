@@ -12,6 +12,12 @@ containing the source code for training, validating, testing and saving your mod
 should be imported from “modules.py” and the data loader should be imported from “dataset.py”. Make
 sure to plot the losses and metrics during training
 """
+# CONSTANTS FOR ENVIRONMENT
+LOCAL = 0
+COLAB = 1
+RANGPUR = 2
+
+MACHINE = RANGPUR # change this depending on where you run the code
 # Device configuration
 if torch.cuda.is_available(): # for GPU users
     device = torch.device('cuda')
@@ -26,9 +32,9 @@ print(f'Using device: {device}')
 NC = 0
 AD = 1
 # Hyperparameters
-num_epochs = 25
+num_epochs = 3
 learning_rate = 0.001
-batch_size = 16
+batch_size = 64
 
 # Data transformations
 train_transform = transforms.Compose([
@@ -42,13 +48,18 @@ test_transform = transforms.Compose([
 
 # Datasets and DataLoaders
 
-# absolute paths: uncomment if running online
-#train_dir = '/PatternAnalysis-2025/recognition/convnext_alzheimer_classification_48043018/ADNI/AD_NC/train'
-#test_dir = '/PatternAnalysis-2025/recognition/convnext_alzheimer_classification_48043018/ADNI/AD_NC/test'
+# if using google colab
+if MACHINE == COLAB:
+    from google.colab import drive
+    drive.mount('/content/drive')
 
-# relative paths: uncomment if running locally
-train_dir = './ADNI/AD_NC/train'
-test_dir = './ADNI/AD_NC/test'
+# switch paths based on environment
+train_dir = ['./ADNI/AD_NC/train',
+              '/content/drive/ADNI/AD_NC/train',
+                '/home/groups/comp3710/ADNI/AD_NC/train'][MACHINE]
+test_dir = ['./ADNI/AD_NC/test', 
+            '/content/drive/ADNI/AD_NC/test',
+              '/home/groups/comp3710/ADNI/AD_NC/test'][MACHINE]
 
 # Datasets
 train_dataset = ADNIDataset(root_dir=train_dir, transform=train_transform)
@@ -89,26 +100,26 @@ if __name__ == "__main__":
                 loss, current = loss.item(), batch * batch_size + len(images)
                 print(f"Epoch [{epoch+1}/{num_epochs}], Step [{current}/{len(train_loader.dataset)}], Loss: {loss:.4f}")
 
-            # validation loop
-            model.eval()
-            val_correct = 0
-            val_total = 0
-            val_loss = 0.0
-            
-            with torch.no_grad():
-                for images, labels in val_loader:
-                    images, labels = images.to(device), labels.to(device)
-                    outputs = model(images)
-                    loss = criterion(outputs, labels)
-                    # accumulate validation statistics on-the-fly
-                    val_loss += loss.item() * images.size(0)
-                    preds = outputs.argmax(dim=1)
-                    val_correct += (preds == labels).sum().item()
-                    val_total += labels.size(0)
+        # validation loop
+        model.eval()
+        val_correct = 0
+        val_total = 0
+        val_loss = 0.0
+        
+        with torch.no_grad():
+            for images, labels in val_loader:
+                images, labels = images.to(device), labels.to(device)
+                outputs = model(images)
+                loss = criterion(outputs, labels)
+                # accumulate validation statistics on-the-fly
+                val_loss += loss.item() * images.size(0)
+                preds = outputs.argmax(dim=1)
+                val_correct += (preds == labels).sum().item()
+                val_total += labels.size(0)
 
-                    # If this is the last batch, compute and print average loss and accuracy
-                    if val_total == len(val_loader.dataset):
-                        avg_val_loss = val_loss / val_total
-                        val_accuracy = 100.0 * val_correct / val_total
-                        print(f"Validation Loss: {avg_val_loss:.4f}, Accuracy: {val_accuracy:.2f}%")
+                # If this is the last batch, compute and print average loss and accuracy
+                if val_total == len(val_loader.dataset):
+                    avg_val_loss = val_loss / val_total
+                    val_accuracy = 100.0 * val_correct / val_total
+                    print(f"Validation Loss: {avg_val_loss:.4f}, Accuracy: {val_accuracy:.2f}%")
         torch.save(model.state_dict(), "model.pth")
