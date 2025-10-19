@@ -48,11 +48,6 @@ test_transform = transforms.Compose([
 
 # Datasets and DataLoaders
 
-# if using google colab
-if MACHINE == COLAB:
-    from google.colab import drive
-    drive.mount('/content/drive')
-
 # switch paths based on environment
 train_dir = ['./ADNI/AD_NC/train',
               '/content/drive/MyDrive/ADNI/AD_NC/train',
