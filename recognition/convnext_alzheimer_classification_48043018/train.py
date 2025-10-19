@@ -32,9 +32,9 @@ print(f'Using device: {device}')
 NC = 0
 AD = 1
 # Hyperparameters
-num_epochs = 3
+num_epochs = 30
 learning_rate = 0.001
-batch_size = 64
+batch_size = 512
 
 # Data transformations
 train_transform = transforms.Compose([
@@ -55,10 +55,10 @@ if MACHINE == COLAB:
 
 # switch paths based on environment
 train_dir = ['./ADNI/AD_NC/train',
-              '/content/drive/ADNI/AD_NC/train',
+              '/content/drive/MyDrive/ADNI/AD_NC/train',
                 '/home/groups/comp3710/ADNI/AD_NC/train'][MACHINE]
 test_dir = ['./ADNI/AD_NC/test', 
-            '/content/drive/ADNI/AD_NC/test',
+            '/content/drive/MyDrive/ADNI/AD_NC/test',
               '/home/groups/comp3710/ADNI/AD_NC/test'][MACHINE]
 
 # Datasets
