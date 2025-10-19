@@ -12,7 +12,16 @@ containing the source code for training, validating, testing and saving your mod
 should be imported from “modules.py” and the data loader should be imported from “dataset.py”. Make
 sure to plot the losses and metrics during training
 """
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+# Device configuration
+if torch.cuda.is_available(): # for GPU users
+    device = torch.device('cuda')
+elif torch.backends.mps.is_available():  # for mac users with M series chips
+    device = torch.device('mps')
+else:
+    device = torch.device('cpu')
+
+print(f'Using device: {device}')
+
 # Class labels
 NC = 0
 AD = 1
@@ -66,8 +75,8 @@ if __name__ == "__main__":
     for epoch in range(num_epochs):
         model.train()
         running_loss = 0.0
-        for batch , images, labels in enumerate(train_loader):
-            images, labels = images.to(device), labels.to(device)
+        for batch , content in enumerate(train_loader):
+            images, labels = content[0].to(device), content[1].to(device)
             optimizer.zero_grad()
             outputs = model(images)
             loss = criterion(outputs, labels)
