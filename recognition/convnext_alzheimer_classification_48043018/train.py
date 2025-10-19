@@ -79,6 +79,27 @@ if __name__ == "__main__":
             if batch % 10 == 0:
                 loss, current = loss.item(), batch * batch_size + len(images)
                 print(f"Epoch [{epoch+1}/{num_epochs}], Step [{current}/{len(train_loader.dataset)}], Loss: {loss:.4f}")
-    
-    # validation loop
-        
+
+            # validation loop
+            model.eval()
+            val_correct = 0
+            val_total = 0
+            val_loss = 0.0
+            
+            with torch.no_grad():
+                for images, labels in val_loader:
+                    images, labels = images.to(device), labels.to(device)
+                    outputs = model(images)
+                    loss = criterion(outputs, labels)
+                    # accumulate validation statistics on-the-fly
+                    val_loss += loss.item() * images.size(0)
+                    preds = outputs.argmax(dim=1)
+                    val_correct += (preds == labels).sum().item()
+                    val_total += labels.size(0)
+
+                    # If this is the last batch, compute and print average loss and accuracy
+                    if val_total == len(val_loader.dataset):
+                        avg_val_loss = val_loss / val_total
+                        val_accuracy = 100.0 * val_correct / val_total
+                        print(f"Validation Loss: {avg_val_loss:.4f}, Accuracy: {val_accuracy:.2f}%")
+        torch.save(model.state_dict(), "model.pth")
