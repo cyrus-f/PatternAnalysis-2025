@@ -17,7 +17,7 @@ LOCAL = 0
 COLAB = 1
 RANGPUR = 2
 
-MACHINE = COLAB # change this depending on where you run the code
+MACHINE = RANGPUR # change this depending on where you run the code
 # Device configuration
 if torch.cuda.is_available(): # for GPU users
     device = torch.device('cuda')
@@ -35,7 +35,7 @@ AD = 1
 num_epochs = 30
 learning_rate = 0.001
 batch_size = 128
-num_workers = 2 # number of subprocesses to use for data loading
+num_workers = 2 if MACHINE == COLAB else (1 if MACHINE == RANGPUR else 4) # number of subprocesses to use for data loading
 
 # Data transformations
 train_transform = transforms.Compose([
@@ -51,10 +51,10 @@ test_transform = transforms.Compose([
 
 # switch paths based on environment
 train_dir = ['./ADNI/AD_NC/train',
-              '/content/drive/MyDrive/ADNI/AD_NC/train',
+              '/content/ADNI/AD_NC/train',
                 '/home/groups/comp3710/ADNI/AD_NC/train'][MACHINE]
 test_dir = ['./ADNI/AD_NC/test', 
-            '/content/drive/MyDrive/ADNI/AD_NC/test',
+            '/content/ADNI/AD_NC/test',
               '/home/groups/comp3710/ADNI/AD_NC/test'][MACHINE]
 
 # Datasets
