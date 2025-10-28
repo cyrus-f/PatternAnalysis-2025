@@ -1,3 +1,4 @@
 ADNI/
 .DS_Store
 .github/
+model.pth
