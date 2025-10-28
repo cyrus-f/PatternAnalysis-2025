@@ -32,7 +32,7 @@ print(f'Using device: {device}')
 NC = 0
 AD = 1
 # Hyperparameters
-num_epochs = 30
+num_epochs = 100
 learning_rate = 1e-4
 batch_size = 128
 num_workers = 2 if MACHINE == COLAB else (1 if MACHINE == RANGPUR else 4) # number of subprocesses to use for data loading
