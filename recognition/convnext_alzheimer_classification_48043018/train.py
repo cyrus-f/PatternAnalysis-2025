@@ -40,11 +40,18 @@ num_workers = 2 if MACHINE == COLAB else (1 if MACHINE == RANGPUR else 4) # numb
 # Data transformations
 train_transform = transforms.Compose([
     transforms.Resize((224, 224)),
+    transforms.RandomRotation(degrees=10),       # small rotations
+    transforms.RandomAffine(degrees=0, translate=(0.05,0.05), scale=(0.95,1.05)),
+    transforms.RandomResizedCrop(224, scale=(0.9,1.0)),
+    transforms.ColorJitter(brightness=0.1, contrast=0.1),  # mild intensity jitter
     transforms.ToTensor(),
+    transforms.ToTensor(),
+    transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]) # Normalise the image
 ])
 test_transform = transforms.Compose([
     transforms.Resize((224, 224)),
     transforms.ToTensor(),
+    transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]) # Normalise the image
 ])
 
 # Datasets and DataLoaders
