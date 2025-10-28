@@ -63,74 +63,78 @@ class ConvNeXtBlock(nn.Module):
         return x
     
 class ConvNeXtBlockTransition(nn.Module):
-    """A ConvNeXt block with transition to downsample and change number of channels.
-    Args:
-        in_channels (int): The number of input channels.
-        out_channels (int): The number of output channels.  
     """
-    def __init__(self, in_channels, out_channels):  # different number of input and output channels
-        super().__init__()
-        hidden_channels = out_channels * 4
-         
-        self.projection = nn.Conv2d(in_channels=in_channels,      
-                                    out_channels=out_channels, 
-                                    kernel_size=1, 
-                                    stride=2,
-                                    padding=0)
-        
-        self.conv0 = nn.Conv2d(in_channels=in_channels, 
-                               out_channels=out_channels, 
-                               kernel_size=7,
-                               stride=1,
-                               padding=3,
-                               groups=in_channels)
-        
-        self.norm0 = nn.LayerNorm(normalized_shape=out_channels)
-        
-        self.conv1 = nn.Conv2d(in_channels=out_channels, 
-                               out_channels=hidden_channels, 
-                               kernel_size=1, 
-                               stride=1, 
-                               padding=0)
-        
-        self.gelu = nn.GELU()
-        
-        self.conv2 = nn.Conv2d(in_channels=hidden_channels, 
-                               out_channels=out_channels, 
-                               kernel_size=1, 
-                               stride=1,
-                               padding=0)
-        
-        self.norm1 = nn.LayerNorm(normalized_shape=out_channels)  
+    A ConvNeXt block that performs downsampling and channel expansion between stages.
 
-        self.downsample = nn.Conv2d(in_channels=out_channels,     
-                                    out_channels=out_channels, 
-                                    kernel_size=2, 
-                                    stride=2)
+    Args:
+        in_channels (int): Number of input channels.
+        out_channels (int): Number of output channels.
+    """
+    def __init__(self, in_channels, out_channels):
+        super().__init__()
+        hidden_channels = out_channels * 4  # inverted bottleneck ratio of 4
+
+        # Downsample and project input to new channel dimension
+        self.projection = nn.Conv2d(
+            in_channels=in_channels,
+            out_channels=out_channels,
+            kernel_size=2,
+            stride=2,    # single stride-2 downsample
+            padding=0
+        )
+
+        # Depthwise convolution (spatial mixing)
+        self.conv0 = nn.Conv2d(
+            in_channels=out_channels,
+            out_channels=out_channels,
+            kernel_size=7,
+            stride=1,
+            padding=3,
+            groups=out_channels
+        )
+
+        # LayerNorm operates on channels-last format, so we permute before/after
+        self.norm = nn.LayerNorm(normalized_shape=out_channels)
+
+        # Pointwise expansion, GELU ,projection back
+        self.conv1 = nn.Conv2d(
+            in_channels=out_channels,
+            out_channels=hidden_channels,
+            kernel_size=1,
+            stride=1
+        )
+
+        self.gelu = nn.GELU()
+
+        self.conv2 = nn.Conv2d(
+            in_channels=hidden_channels,
+            out_channels=out_channels,
+            kernel_size=1,
+            stride=1
+        )
+
     def forward(self, x):
         """
-        Forward pass of the ConvNeXt block with transition.
         Args:
             x (torch.Tensor): Input tensor of shape (N, C_in, H, W)
         Returns:
             torch.Tensor: Output tensor of shape (N, C_out, H/2, W/2)
         """
-        residual = self.projection(x)  #(1)
-        x = self.conv0(x)
+        # Downsample and change number of channels
+        residual = self.projection(x)
+
+        # Depthwise convolution + normalization + MLP-style projection
+        x = self.conv0(residual)
         x = x.permute(0, 2, 3, 1)
-        x = self.norm0(x)
+        x = self.norm(x)
         x = x.permute(0, 3, 1, 2)
         x = self.conv1(x)
         x = self.gelu(x)
         x = self.conv2(x)
-        x = x.permute(0, 2, 3, 1)
-        x = self.norm1(x)
-        x = x.permute(0, 3, 1, 2)
-        x = self.downsample(x)  #(2)
-        x = x + residual  #(3)
-        
+
+        # Skip connection
+        x = x + residual
         return x
-    
 class ConvNeXt(nn.Module):
     """"
     The ConvNeXt architecture for image classification.

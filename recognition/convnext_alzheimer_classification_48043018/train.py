@@ -45,7 +45,6 @@ train_transform = transforms.Compose([
     transforms.RandomResizedCrop(224, scale=(0.9,1.0)),
     transforms.ColorJitter(brightness=0.1, contrast=0.1),  # mild intensity jitter
     transforms.ToTensor(),
-    transforms.ToTensor(),
     transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]) # Normalise the image
 ])
 test_transform = transforms.Compose([
