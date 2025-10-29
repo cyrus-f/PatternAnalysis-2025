@@ -27,7 +27,43 @@ The selected model is ConvNeXt-T (Tiny), a small sized model appropriate for the
 
 ## Model Architecture
 
+### Model Selection
+
+compare the different sizes of the ConvNeXt model:
+5 different variants of the ConvNeXt model were considered:
+![comparison of the different sizes of ConvNeXt](images/model_sizes.png)
+
+The ConvNeXt-T (tiny) architecture was chosen as it is most suitable for the size of the limited dataset. Smaller datasets are common in medical imaging due to limitations such as cost and privacy.
+
+![graph of training loss and accuracy]()
+
 ## Data
+
+There are 2 classes in the provided ADNI dataset:
+
+*30,590* total images
+
+- Normal Control (NC); and
+- Alzheimer's Disease (AD).
+
+The original data provided was only split into 2 sets, training and testing. However, in machine learning it is beneficial to also have a validation set for tuning hyperparameters. To solve this, the full training set was separated with an 80/20 split into training and validation images respectively. The training data was split rather than the testing data in order to keep the test set completely isolated and avoid the risk of data leakage and overfitting.
+
+This resulted in the following dataset sizes:
+
+- Training Set: (total images 17,262)
+  - NC : 8958 images
+  - AD : 8304 images
+
+- Validation Set: (total images 4,315)
+  - NC : 2191 images
+  - AD : 2124 images
+
+- Testing Set: (total images 9,013)
+  - NC : 4540 images
+  - AD : 4473 images
+
+The resulting split is therefore approximately 57% training, 14% validation, and 29% testing.
+This ensures that the majority of the data is dedicated to the training of the model, while there is some used for training hyperparameters, and a reasonable amount left at the end for unbiased testing of the performance of the model.
 
 ## Training
 
