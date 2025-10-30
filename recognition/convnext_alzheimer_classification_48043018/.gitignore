@@ -3,3 +3,4 @@ ADNI/
 .github/
 model.pth
 models/
+report.pdf

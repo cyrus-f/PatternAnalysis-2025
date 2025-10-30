@@ -19,7 +19,7 @@ The model was trained on a Google Colab A100 GPU and reached 78.29% accuracy.
 
 ---
 
-## Table of Contents
+# Table of Contents
 
 - [Project Overview](#project-overview)
 - [References](#references)
@@ -117,9 +117,9 @@ There are 2 classes in the provided ADNI dataset:
 The original data provided was only split into 2 sets, training and testing. However, in machine learning it is beneficial to also have a validation set for tuning hyperparameters. To solve this, the full training set was separated with an 80/20 split into training and validation images respectively. The training data was split rather than the testing data in order to keep the test set completely isolated and avoid the risk of data leakage and overfitting. As seen below a seed is used so that the split is always the same and remains reproducible.
 
 ```python
-generator = torch.Generator().manual_seed(42) # for reproducibility so the split is always the same
-train_dataset, val_dataset = torch.utils.data.random_split(train_dataset, [0.8, 0.2], generator=generator) # do an 80-20 split for training and validation
-
+generator = torch.Generator().manual_seed(42) 
+train_dataset, val_dataset 
+  = torch.utils.data.random_split(train_dataset, [0.8, 0.2], generator=generator)
 ```
 
 This resulted in the following dataset sizes:
@@ -160,12 +160,12 @@ The same was applied to the validation set.
 ``` python
 train_transform = transforms.Compose([
     transforms.Resize((224, 224)),
-    transforms.RandomRotation(degrees=10),       # small rotations
+    transforms.RandomRotation(degrees=10),       
     transforms.RandomAffine(degrees=0, translate=(0.05,0.05), scale=(0.95,1.05)),
     transforms.RandomResizedCrop(224, scale=(0.9,1.0)),
-    transforms.ColorJitter(brightness=0.1, contrast=0.1),  # mild intensity jitter
+    transforms.ColorJitter(brightness=0.1, contrast=0.1),  
     transforms.ToTensor(),
-    transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]) # Normalise the image
+    transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
 ])
 ```
 
@@ -180,7 +180,7 @@ Only very simple transforms were applied to the testing data. It is important no
 test_transform = transforms.Compose([
     transforms.Resize((224, 224)),
     transforms.ToTensor(),
-    transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]) # Normalise the image
+    transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
 ])
 ```
 
@@ -232,7 +232,8 @@ for epoch in range(num_epochs):
 
         if batch % 10 == 0:
             loss, current = loss.item(), batch * batch_size + len(images)
-            print(f"Epoch [{epoch+1}/{num_epochs}], Step [{current}/{len(train_loader.dataset)}], Loss: {loss:.4f}")
+            print(f"Epoch [{epoch+1}/{num_epochs}], \
+               Step [{current}/{len(train_loader.dataset)}], Loss: {loss:.4f}")
 
 ```
 
