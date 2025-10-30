@@ -39,6 +39,21 @@ To create the environment run:
     conda activate torch
 ```
 
+## Running the Project
+
+Assuming you have the ADNI dataset.
+
+1. Modify the `MACHINE` variable in `train.py` and `predict.py` to reflect whether you are running on your local machine, Google Colab, or Rangpur. This is to adjust the file paths and the number of allowed worker threads depending on the platform. (Reported training was conducted on Google Colab)
+
+2. Execute the following commands:
+
+    ```bash
+    python3 train.py
+    python3 predict.py
+    ```
+
+When `train.py` is run, it will output a file called `model.pth` which contains the trained model weights. This will then be used by `predict.py` to run inference on the testing data.
+
 ## Model Architecture
 
 ### Model Selection
@@ -49,7 +64,9 @@ compare the different sizes of the ConvNeXt model:
 
 The ConvNeXt-T (tiny) architecture was chosen as it is most suitable for the size of the limited dataset. Smaller datasets are common in medical imaging due to limitations such as cost and privacy.
 
-![graph of training loss and accuracy]()
+![graph of training loss and validation loss](images/loss_graph.png)
+
+![graph of validation accuracy](images/accuracy_graph.png)
 
 ## Data
 
