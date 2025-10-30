@@ -213,6 +213,13 @@ Although a high level of accuracy was achieved in the model, it can be seen in t
 
 ## Conclusion
 
+## Appendix
+
+Additional helper scripts and output data can be found in the [./images](./images) subdirectory. Namely:
+
+- `parser.py`: a helper script to parse the printed outputs from model training into a csv file if training is already complete and the values are no longer loaded in memory. Outputs to the file `validation_data.csv` for analysis and graph generating
+- `graphing.py`: given a csv file with info about the training loss, validation loss, and validation accuracy at each epoch, generates the relevant graphs
+
 ## References
 
 1. Liu, Z., Mao, H., Wu, C.-Y., Feichtenhofer, C., Darrell, T., & Xie, S. (2022). A ConvNet for the 2020s. ArXiv:2201.03545 [Cs]. [https://arxiv.org/abs/2201.03545](https://arxiv.org/abs/2201.03545)
