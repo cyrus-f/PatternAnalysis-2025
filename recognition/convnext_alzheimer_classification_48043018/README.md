@@ -15,6 +15,18 @@ with a goal of at least 80% accuracy on the test data.
 
 The selected model is ConvNeXt-T (Tiny), a small sized model appropriate for the amount of images in the ADNI dataset. It is **not** pre-trained on the ImageNet as in the paper, but trained from scratch on the ADNI data.
 
+The ConvNeXt model emerged recently to combat the idea that "Transformers are better at Computer Vision than Convolutional Neural Networks". Liu et al wanted to build a pure convolutional network that could perform at the same standard as a transformer model.
+
+This was achieved by mimicking the concept of self-attention but using only convolution. The ConvNeXt architecture began with a ResNet-50 model and modernised this through 5 design decisions as seen below:
+
+1. macro design
+2. ResNeXt
+3. inverted bottleneck
+4. large kernel size
+5. various layer-wise micro designs
+
+![5 design decisions that convert ResNet-50 to ConvNext](images/resnet-50-to-convnext.png)
+
 ---
 
 ## Table of Contents
@@ -58,7 +70,7 @@ When `train.py` is run, it will output a file called `model.pth` which contains 
 
 ### Model Selection
 
-compare the different sizes of the ConvNeXt model:
+When comparing the different sizes in the ConvNeXt model family,
 5 different variants of the ConvNeXt model were considered:
 
 - ConvNeXt-T: C = (96, 192, 384, 768), B = (3, 3, 9, 3)
@@ -77,14 +89,14 @@ The ConvNeXt-T (tiny) architecture was chosen as it is most suitable for the siz
 
 There are 2 classes in the provided ADNI dataset:
 
-*30,590* total images
-
 - Normal Control (NC); and
 - Alzheimer's Disease (AD).
 
 The original data provided was only split into 2 sets, training and testing. However, in machine learning it is beneficial to also have a validation set for tuning hyperparameters. To solve this, the full training set was separated with an 80/20 split into training and validation images respectively. The training data was split rather than the testing data in order to keep the test set completely isolated and avoid the risk of data leakage and overfitting.
 
 This resulted in the following dataset sizes:
+
+*30,590* total images
 
 - Training Set: (total images 17,262)
   - NC : 8958 images
