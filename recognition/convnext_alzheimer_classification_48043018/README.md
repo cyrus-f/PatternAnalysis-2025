@@ -15,18 +15,6 @@ with a goal of at least 80% accuracy on the test data.
 
 The selected model is ConvNeXt-T (Tiny), a small sized model appropriate for the amount of images in the ADNI dataset. It is **not** pre-trained on the ImageNet as in the paper, but trained from scratch on the ADNI data.
 
-The ConvNeXt model emerged recently to combat the idea that "Transformers are better at Computer Vision than Convolutional Neural Networks". Liu et al wanted to build a pure convolutional network that could perform at the same standard as a transformer model.
-
-This was achieved by mimicking the concept of self-attention but using only convolution. The ConvNeXt architecture began with a ResNet-50 model and modernised this through 5 design decisions as seen below:
-
-1. macro design
-2. ResNeXt
-3. inverted bottleneck
-4. large kernel size
-5. various layer-wise micro designs
-
-![5 design decisions that convert ResNet-50 to ConvNext](images/resnet-50-to-convnext.png)
-
 ---
 
 ## Table of Contents
@@ -68,6 +56,22 @@ When `train.py` is run, it will output a file called `model.pth` which contains 
 
 ## Model Architecture
 
+### ConvNeXt Design
+
+The ConvNeXt model emerged recently to combat the idea that "Transformers are better at Computer Vision than Convolutional Neural Networks". Liu et al wanted to build a pure convolutional network that could perform at the same standard as a transformer model.
+
+This was achieved by mimicking the concept of self-attention but using only convolution. The ConvNeXt architecture began with a ResNet-50 model and modernised this through 5 design decisions as seen below:
+
+1. macro design
+2. ResNeXt
+3. inverted bottleneck
+4. large kernel size
+5. various layer-wise micro designs
+
+![5 design decisions that convert ResNet-50 to ConvNext](images/resnet-50-to-convnext.png)
+
+
+
 ### Model Selection
 
 When comparing the different sizes in the ConvNeXt model family,
@@ -81,9 +85,7 @@ When comparing the different sizes in the ConvNeXt model family,
 
 The ConvNeXt-T (tiny) architecture was chosen as it is most suitable for the size of the limited dataset. Smaller datasets are common in medical imaging due to limitations such as cost and privacy.
 
-![graph of training loss and validation loss](images/loss_graph.png)
 
-![graph of validation accuracy](images/accuracy_graph.png)
 
 ## Data
 
@@ -143,7 +145,67 @@ test_transform = transforms.Compose([
 ])
 ```
 
-## Results
+### Training Configuration
+
+- Optimiser: AdamW chosen as mentioned in the ConvNeXt paper
+- Learning Rate: 0.0001
+- Loss Function: Cross Entropy Loss
+
+```python
+criterion = nn.CrossEntropyLoss()
+optimizer = optim.AdamW(model.parameters(), lr=learning_rate)
+```
+
+### Training Loop
+
+Hyperparameters
+
+```python
+num_epochs = 100
+learning_rate = 1e-4
+batch_size = 128
+```
+
+The steps in the training loop are:
+
+1. Forward Pass: each batch of images is passed through the ConvNeXt model
+
+2. Loss is calculated with cross entropy
+
+3. Backpropagation and Optimisation
+
+Sample of the training loop:
+
+```python
+train_losses = []
+for epoch in range(num_epochs):
+    model.train()
+    running_loss = 0.0
+    for batch , content in enumerate(train_loader):
+        images, labels = content[0].to(device), content[1].to(device)
+        optimizer.zero_grad()
+        outputs = model(images)
+        loss = criterion(outputs, labels)
+        # backpropagation
+        loss.backward()
+        optimizer.step()
+        optimizer.zero_grad()
+
+        if batch % 10 == 0:
+            loss, current = loss.item(), batch * batch_size + len(images)
+            print(f"Epoch [{epoch+1}/{num_epochs}], Step [{current}/{len(train_loader.dataset)}], Loss: {loss:.4f}")
+
+```
+
+![graph of training loss and validation loss](images/loss_graph.png)
+
+![graph of validation accuracy](images/accuracy_graph.png)
+
+## Results Analysis
+
+![Confusion Matrix](images/confusion_matrix.png)
+
+Although a high level of accuracy was achieved in the model, it can be seen in the Confusion Matrix that false negatives (i.e. predicting NC but truth being AD) are much more common than false positives. This means the model will underdiagnose rather than overdiagnose alzheimers. In a medical setting this would not be prefered. It would be better to have an oversensitive model that is more likely to classify people as having Alzheimer's so that they get examined and a professional opinion, even if they end up being healthy. This would be more beneficial than their illnes "flying under the radar" and being left untreated.
 
 ## Evaluation
 
