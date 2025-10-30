@@ -1,3 +1,7 @@
+""""parser.py
+Helper script to parse training log file and extract epoch-wise training loss, validation loss,
+and validation accuracy into a CSV file for further analysis and graphing.
+"""
 import re
 import csv
 

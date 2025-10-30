@@ -1,3 +1,7 @@
+""" graphing.py
+Helper script for generating graphs of training and validation metrics from CSV data.
+This script reads a CSV file containing epoch-wise training loss, validation loss,
+and validation accuracy, and generates graphs to visualize these metrics over epochs."""
 import pandas as pd
 import matplotlib.pyplot as plt
 

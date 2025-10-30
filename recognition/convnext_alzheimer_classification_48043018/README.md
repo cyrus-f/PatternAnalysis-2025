@@ -60,7 +60,12 @@ When `train.py` is run, it will output a file called `model.pth` which contains 
 
 compare the different sizes of the ConvNeXt model:
 5 different variants of the ConvNeXt model were considered:
-![comparison of the different sizes of ConvNeXt](images/model_sizes.png)
+
+- ConvNeXt-T: C = (96, 192, 384, 768), B = (3, 3, 9, 3)
+- ConvNeXt-S: C = (96, 192, 384, 768), B = (3, 3, 27, 3)
+- ConvNeXt-B: C = (128, 256, 512, 1024), B = (3, 3, 27, 3)
+- ConvNeXt-L: C = (192, 384, 768, 1536), B = (3, 3, 27, 3)
+- ConvNeXt-XL: C = (256, 512, 1024, 2048), B = (3, 3, 27, 3)
 
 The ConvNeXt-T (tiny) architecture was chosen as it is most suitable for the size of the limited dataset. Smaller datasets are common in medical imaging due to limitations such as cost and privacy.
 
