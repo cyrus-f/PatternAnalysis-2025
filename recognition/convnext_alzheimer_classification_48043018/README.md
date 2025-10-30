@@ -119,7 +119,17 @@ This ensures that the majority of the data is dedicated to the training of the m
 
 ### Training Data Preprocessing
 
-explain this
+The following transformations were applied to all images in the training dataset:
+
+- **Resize:** the images were all resized to 224x224 pixels to ensure compatibility with the model
+- **Random Rotation:** images have a chance of being rotated up to 10 degrees in either direction, allowing the learning of features at different orientations and not introducing too large of a change to the image
+- **Random Affine Transform:** a small translation of up to 5% which shifts the position of the image to remove bias of the brain having to be in a particular place in the image
+- **Random Resized Crop:** a random crop of 224x224 pixels is applied
+- **Colour Jitter:** randomly vary the brightness and contrast in images so that the model learns to work in different lighting conditions
+- **Normalise** since image is black and white, we normalise with a mean and standard deviation of 0.5 on all three channels so the model treats inputs consistently
+
+These transformations all remove bias in the model and help it to learn the true features of the brain across different light and orientation conditions, not overfitting to any particular imaging angles or lighting that is present in the training data but learning the general features.
+The same was applied to the validation set.
 
 ``` python
 train_transform = transforms.Compose([
@@ -135,7 +145,10 @@ train_transform = transforms.Compose([
 
 ### Testing Data Preprocessing
 
-explain this
+Only very simple transforms were applied to the testing data. It is important not to augment the testing data so we see the accuracy against real world images and use cases of the model. Transformations were:
+
+- **Resize:** the images were all resized to 224x224 pixels to ensure compatibility with the model
+- **Normalise** again the images were normalised with 0.5 mean and standard deviation across the three channels for consistency.
 
 ``` python
 test_transform = transforms.Compose([
