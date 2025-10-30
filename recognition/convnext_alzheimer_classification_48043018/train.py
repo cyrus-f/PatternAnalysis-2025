@@ -1,3 +1,7 @@
+""" train.py
+Key components for training the ConvNeXt model for Alzheimer's classification.
+This script includes data loading, model training, validation, and saving the trained model.
+"""
 from dataset import ADNIDataset
 from modules import ConvNeXt
 import torch
@@ -7,11 +11,7 @@ from torch.utils.data import DataLoader
 import numpy as np
 import matplotlib.pyplot as plt
 from torchvision import transforms
-"""
-containing the source code for training, validating, testing and saving your model. The model
-should be imported from “modules.py” and the data loader should be imported from “dataset.py”. Make
-sure to plot the losses and metrics during training
-"""
+
 # CONSTANTS FOR ENVIRONMENT
 LOCAL = 0
 COLAB = 1

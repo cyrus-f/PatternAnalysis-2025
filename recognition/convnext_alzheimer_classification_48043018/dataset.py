@@ -1,3 +1,13 @@
+""" dataset.py
+Custom Dataset class for loading ADNI images and labels.
+This module defines the ADNIDataset class which inherits from torch.utils.data.Dataset.
+It handles loading images from specified directories, applying transformations, and providing
+image-label pairs for training and evaluation.
+
+key classes:
+- ImageInfo: A simple class to hold image path and label information.
+- ADNIDataset: Custom Dataset for loading ADNI images and labels.
+"""
 import torch
 from torch.utils.data import Dataset
 from torchvision import transforms

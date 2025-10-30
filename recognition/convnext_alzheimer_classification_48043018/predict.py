@@ -1,6 +1,7 @@
-"""
-showing example usage of your trained model. Print out any results and / or provide visu-
-alisations where applicable
+"""predict.py
+Key components for performing inference using the trained ConvNeXt model for Alzheimer's classification.
+This script includes loading the trained model, preparing the test dataset, performing inference,
+and displaying the results including a confusion matrix.
 """
 from dataset import ADNIDataset
 from modules import ConvNeXt

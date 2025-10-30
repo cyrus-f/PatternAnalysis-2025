@@ -1,3 +1,13 @@
+"""modules.py
+Implementation of the ConvNeXt architecture for image classification.
+This module defines the ConvNeXt model and its building blocks, including ConvNeXtBlock and
+ConvNeXtBlockTransition.
+
+key classes:
+- ConvNeXtBlock: A single ConvNeXt block.
+- ConvNeXtBlockTransition: A ConvNeXt block that performs downsampling and channel expansion between stages.
+- ConvNeXt: The complete ConvNeXt architecture for image classification.
+"""
 import torch
 import torch.nn as nn
 

@@ -15,7 +15,6 @@ with a goal of at least 80% accuracy on the test data.
 
 The selected model is ConvNeXt-T (Tiny), a small sized model appropriate for the amount of images in the ADNI dataset. It is **not** pre-trained on the ImageNet as in the paper, but trained from scratch on the ADNI data.
 
-
 ---
 
 ## Table of Contents
@@ -27,7 +26,7 @@ The selected model is ConvNeXt-T (Tiny), a small sized model appropriate for the
 
 ## Reproducibility and Dependencies
 
-The dependencies are:
+All dependencies are found in `environment.yml` file. The key dependencies are:
 
 - torch==2.8.0
 - torchaudio==2.8.0
