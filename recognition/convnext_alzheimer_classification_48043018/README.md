@@ -15,6 +15,8 @@ with a goal of at least 80% accuracy on the test data.
 
 The selected model is ConvNeXt-T (Tiny), a small sized model appropriate for the amount of images in the ADNI dataset. It is **not** pre-trained on the ImageNet as in the paper, but trained from scratch on the ADNI data.
 
+The model was trained on a Google Colab A100 GPU and reached 78.29% accuracy.
+
 ---
 
 ## Table of Contents
@@ -81,6 +83,8 @@ Here are some reasons why ConvNeXt is a suitable model for classifying brain MRI
 3. **Depthwise Convolutions:** this means that one filter is used per input channel. Then pointwise 1x1 convolutions happen. This reduces parameter count and the risk of overfitting, important given the small dataset size.
 4. **Efficiency Advantage:** ConvNeXt has comparable or better performance than Vision Transformers while having lower data and computation requirements.
 
+![resnet vs convnext architecture](images/resnet_vs_convnext.png)
+
 
 ### Model Selection
 
@@ -104,7 +108,19 @@ There are 2 classes in the provided ADNI dataset:
 - Normal Control (NC); and
 - Alzheimer's Disease (AD).
 
-The original data provided was only split into 2 sets, training and testing. However, in machine learning it is beneficial to also have a validation set for tuning hyperparameters. To solve this, the full training set was separated with an 80/20 split into training and validation images respectively. The training data was split rather than the testing data in order to keep the test set completely isolated and avoid the risk of data leakage and overfitting.
+![NC brain](images/NC_brain.jpeg)
+>*NC brain example*
+
+![AD brain](images/AD_brain.jpeg)
+>*AD brain example*
+
+The original data provided was only split into 2 sets, training and testing. However, in machine learning it is beneficial to also have a validation set for tuning hyperparameters. To solve this, the full training set was separated with an 80/20 split into training and validation images respectively. The training data was split rather than the testing data in order to keep the test set completely isolated and avoid the risk of data leakage and overfitting. As seen below a seed is used so that the split is always the same and remains reproducible.
+
+```python
+generator = torch.Generator().manual_seed(42) # for reproducibility so the split is always the same
+train_dataset, val_dataset = torch.utils.data.random_split(train_dataset, [0.8, 0.2], generator=generator) # do an 80-20 split for training and validation
+
+```
 
 This resulted in the following dataset sizes:
 
