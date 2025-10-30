@@ -11,6 +11,7 @@ from torch.utils.data import DataLoader
 import numpy as np
 import matplotlib.pyplot as plt
 from torchvision import transforms
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 
 # CONSTANTS FOR ENVIRONMENT
 LOCAL = 0
@@ -91,4 +92,12 @@ if __name__ == "__main__":
     accuracy = (all_preds == all_labels).float().mean()
     print(f"Test Accuracy: {accuracy.item() * 100:.2f}%")
 
-
+    # Confusion Matrix
+    print("Generating confusion matrix...")
+    cm = confusion_matrix(all_labels.numpy(), all_preds.numpy(), labels=[NC, AD])
+    disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=['NC', 'AD'])
+    disp.plot(cmap=plt.cm.Blues)
+    plt.title("Confusion Matrix on Test Set")
+    plt.savefig('images/confusion_matrix.png')
+    print("Confusion matrix saved to images/confusion_matrix.png")
+    plt.show()

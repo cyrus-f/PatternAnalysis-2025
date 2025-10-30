@@ -25,6 +25,21 @@ The selected model is ConvNeXt-T (Tiny), a small sized model appropriate for the
 
 ---
 
+## Reproducibility and Dependencies
+
+The dependencies are:
+
+- torch==2.8.0
+- torchaudio==2.8.0
+- torchvision==0.23.0
+
+To create the environment run:
+
+```bash
+    conda env create -f environment.yml
+    conda activate torch
+```
+
 ## Model Architecture
 
 ### Model Selection
@@ -66,6 +81,34 @@ The resulting split is therefore approximately 57% training, 14% validation, and
 This ensures that the majority of the data is dedicated to the training of the model, while there is some used for training hyperparameters, and a reasonable amount left at the end for unbiased testing of the performance of the model.
 
 ## Training
+
+### Training Data Preprocessing
+
+explain this
+
+``` python
+train_transform = transforms.Compose([
+    transforms.Resize((224, 224)),
+    transforms.RandomRotation(degrees=10),       # small rotations
+    transforms.RandomAffine(degrees=0, translate=(0.05,0.05), scale=(0.95,1.05)),
+    transforms.RandomResizedCrop(224, scale=(0.9,1.0)),
+    transforms.ColorJitter(brightness=0.1, contrast=0.1),  # mild intensity jitter
+    transforms.ToTensor(),
+    transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]) # Normalise the image
+])
+```
+
+### Testing Data Preprocessing
+
+explain this
+
+``` python
+test_transform = transforms.Compose([
+    transforms.Resize((224, 224)),
+    transforms.ToTensor(),
+    transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]) # Normalise the image
+])
+```
 
 ## Results
 
