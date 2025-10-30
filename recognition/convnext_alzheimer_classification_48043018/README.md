@@ -26,11 +26,13 @@ The selected model is ConvNeXt-T (Tiny), a small sized model appropriate for the
 
 ## Reproducibility and Dependencies
 
-All dependencies are found in `environment.yml` file. The key dependencies are:
+All dependencies are found in `environment.yml` file. Some key dependencies are:
 
 - torch==2.8.0
-- torchaudio==2.8.0
 - torchvision==0.23.0
+- numpy=2.3.1
+- matplotlib=3.10.5
+- scikit-learn=1.7.1
 
 To create the environment run:
 
@@ -58,7 +60,7 @@ When `train.py` is run, it will output a file called `model.pth` which contains 
 
 ### ConvNeXt Design
 
-The ConvNeXt model emerged recently to combat the idea that "Transformers are better at Computer Vision than Convolutional Neural Networks". Liu et al wanted to build a pure convolutional network that could perform at the same standard as a transformer model.
+The ConvNeXt model emerged recently to combat the idea that "Transformers are better at Computer Vision than Convolutional Neural Networks". Liu et al [[1](#references)] wanted to build a pure convolutional network that could perform at the same standard as a transformer model.
 
 This was achieved by mimicking the concept of self-attention but using only convolution. The ConvNeXt architecture began with a ResNet-50 model and modernised this through 5 design decisions as seen below:
 
@@ -70,6 +72,14 @@ This was achieved by mimicking the concept of self-attention but using only conv
 
 ![5 design decisions that convert ResNet-50 to ConvNext](images/resnet-50-to-convnext.png)
 
+### Why ConvNeXt?
+
+Here are some reasons why ConvNeXt is a suitable model for classifying brain MRI scans for Alzheimer's:
+
+1. **Increased Kernel Size:** ConvNeXt has a 7x7 kernel, much larger than the standard 3x3 used in ResNet. This allows for capturing global structural features of the brain.
+2. **Inverted Bottleneck:** instead of compressing like the ResNet, the number of channels is first expanded (namely multiplied by 4), depthwise convolutions occur, and they are projected back down. This allows high dimensional feature extraction and identifying fine-grained variations in brain textures that are critical for distinguishing AD and NC brains.
+3. **Depthwise Convolutions:** this means that one filter is used per input channel. Then pointwise 1x1 convolutions happen. This reduces parameter count and the risk of overfitting, important given the small dataset size.
+4. **Efficiency Advantage:** ConvNeXt has comparable or better performance than Vision Transformers while having lower data and computation requirements.
 
 
 ### Model Selection
