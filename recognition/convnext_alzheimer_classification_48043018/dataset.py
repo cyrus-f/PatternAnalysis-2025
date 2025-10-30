@@ -48,6 +48,10 @@ class ADNIDataset(Dataset):
                 self.image_infos.append(ImageInfo(img_path, label))
 
     def __len__(self):
+        """
+        Returns:
+            int: Total number of samples in the dataset.
+        """
         return len(self.image_infos)
 
     def __getitem__(self, idx):
