@@ -4,3 +4,4 @@ ADNI/
 model.pth
 models/
 report.pdf
+__pycache__/
